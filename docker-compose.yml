@@ -1,0 +1,52 @@
+version: '3.4'
+
+services:
+  consul-server:
+    image: hashicorp/consul:latest
+    ports:
+      - "8500:8500"
+    networks:
+      - stores-network
+
+  store_api:
+    image: ${DOCKER_REGISTRY-}storeapi
+    container_name: store_api
+    build:
+      context: .
+      dockerfile: Store_API/Dockerfile
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - store_db
+    networks:
+      - stores-network
+  
+  store_db:
+    image: ${DOCKER_REGISTRY-}mongo  
+    container_name: store_db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongouser
+      MONGO_INITDB_ROOT_PASSWORD: mongopass
+    networks:
+      - stores-network
+  
+  mongo-express:
+    image: ${DOCKER_REGISTRY-}mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongouser
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongopass
+      ME_CONFIG_MONGODB_URL: mongodb://mongouser:mongopass@store_db:27017/
+      ME_CONFIG_BASICAUTH: false
+    networks:
+      - stores-network
+  
+networks:
+  stores-network:
+    driver: bridge
+  

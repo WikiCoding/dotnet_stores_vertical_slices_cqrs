@@ -1,0 +1,7 @@
+.vs
+bin
+obj
+Store_API/bin
+Store_API/obj
+Gateway_Store_API/bin
+Gateway_Store_API/obj
